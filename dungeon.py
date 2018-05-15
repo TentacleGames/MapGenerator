@@ -11,7 +11,6 @@ DEFAULT_PARAMS = {
     'rooms_count': 10,
     'width': 120,
     'height': 50,
-    'new_param': None
 }
 
 
@@ -187,24 +186,21 @@ class Generator():
         return collide
 
     def _generate_corridor(self, roomA, roomB):
+        def _create_door_points():
+            return
         #TODO: refine
         corr = Corridor()
         corr.rooms.append(roomA.id)
         corr.rooms.append(roomB.id)
-        dirx = '' # direction from A to B
-        diry = ''  # direction from A to B
         dir = ''
         if roomA.id == roomB.id:
             while not dir:
-                dirx = ' WE'[randint(0,2)]
-                diry = ' NS'[randint(0, 2)]
-                dir = (diry + dirx).strip()
+                dir = '{}{}'.format(' NS'[randint(0, 2)], ' WE'[randint(0, 2)]).strip()
         else:
-            if roomA.x != roomB.x:
-                dirx = 'W' if roomA.x > roomB.x else 'E'
             if roomA.y != roomB.y:
-                diry = 'N' if roomA.y > roomB.y else 'S'
-            dir = diry + dirx
+                dir += 'N' if roomA.y > roomB.y else 'S'
+            if roomA.x != roomB.x:
+                dir += 'W' if roomA.x > roomB.x else 'E'
 
         first_dir = ''
         last_dir = ''
@@ -370,149 +366,6 @@ class Generator():
             return corr
         else:
             return None
-
-    def _old_generate_corridor(self, roomA, roomB):
-        #TODO: refine
-        corr = Corridor()
-        corr.rooms.append(roomA.id)
-        corr.rooms.append(roomB.id)
-        dirx = '' # direction from A to B
-        diry = ''  # direction from A to B
-        dir = ''
-        if roomA.id == roomB.id:
-            while not dir:
-                dirx = ' WE'[randint(0,2)]
-                diry = ' NS'[randint(0, 2)]
-                dir = (diry + dirx).strip()
-        else:
-            if roomA.x != roomB.x:
-                dirx = 'W' if roomA.x > roomB.x else 'E'
-            if roomA.y != roomB.y:
-                diry = 'N' if roomA.y > roomB.y else 'S'
-            dir = diry + dirx
-
-        first_dir = ''
-        last_dir = ''
-        if dir == 'N':
-            first_dir = last_dir = 'N'
-            corr.P1 = (randint(roomA.x, roomA.x+roomA.wd-1) , roomA.y-1) # top of A
-            corr.P2 = (randint(roomB.x, roomB.x+roomB.wd-1) , roomB.y+roomB.hd) # bottom of B
-        elif dir == 'NE':
-            if randint(0,1)==0:
-                first_dir = 'N'
-                corr.P1 = (randint(roomA.x+roomA.wd//2, roomA.x+roomA.wd-1), roomA.y-1) # right half of top edge of A
-            else:
-                first_dir = 'E'
-                corr.P1 = (roomA.x+roomA.wd, randint(roomA.y, roomA.y+roomA.hd//2)) # top half of right edge of A
-            if randint(0, 1) == 0:
-                last_dir = 'N'
-                corr.P2 = (randint(roomB.x, roomB.x+roomB.wd//2), roomB.y+roomB.hd) # left half of bottom edge of B
-            else:
-                last_dir = 'E'
-                corr.P2 = (roomB.x-1, randint(roomB.y+roomB.hd//2, roomB.y+roomB.hd-1)) # bottom half of left edge of B
-        elif dir == 'E':
-            first_dir = last_dir = 'E'
-            corr.P1 = (roomA.x+roomA.wd, randint(roomA.y, roomA.y+roomA.hd-1)) # right of A
-            corr.P2 = (roomB.x-1, randint(roomB.y, roomB.y+roomB.hd-1)) # left of B
-        elif dir == 'SE':
-            if randint(0, 1) == 0:
-                first_dir = 'E'
-                corr.P1 = (roomA.x+roomA.wd, randint(roomA.y+roomA.hd//2, roomA.y+roomA.hd-1)) # bottom half of right edge of A
-            else:
-                first_dir = 'S'
-                corr.P1 = (randint(roomA.x+roomA.wd//2, roomA.x+roomA.wd), roomA.y+roomA.hd) # right half of bottom edge of A
-            if randint(0, 1) == 0:
-                last_dir = 'S'
-                corr.P2 = (randint(roomB.x, roomB.x+roomB.wd//2), roomB.y-1) # left half of top edge of B
-            else:
-                last_dir = 'E'
-                corr.P2 = (roomB.x-1, randint(roomB.y, roomB.y+roomB.hd//2)) # top half of left edge of B
-        elif dir == 'S':
-            first_dir = last_dir = 'S'
-            corr.P1 = (randint(roomA.x, roomA.x + roomA.wd-1), roomA.y + roomA.hd)  # bottom of A
-            corr.P2 = (randint(roomB.x, roomB.x + roomB.wd-1), roomB.y-1)  # top of B
-        elif dir == 'SW':
-            if randint(0, 1) == 0:
-                first_dir = 'S'
-                corr.P1 = (randint(roomA.x, roomA.x+roomA.wd//2), roomA.y+roomA.hd) # left half of bottom edge of A
-            else:
-                first_dir = 'W'
-                corr.P1 = (roomA.x-1, randint(roomA.y+roomA.hd//2, roomA.y+roomA.hd-1)) # bottom half of left edge of A
-            if randint(0,1)==0:
-                last_dir = 'S'
-                corr.P2 = (randint(roomB.x+roomB.wd//2, roomB.x+roomB.wd-1), roomB.y-1) # right half of top edge of B
-            else:
-                last_dir = 'W'
-                corr.P2 = (roomB.x+roomB.wd, randint(roomB.y, roomB.y+roomB.hd//2)) # top half of right edge of B
-        elif dir == 'W':
-            first_dir = last_dir = 'W'
-            corr.P1 = (roomA.x-1, randint(roomA.y, roomA.y+roomA.hd-1))  # left of A
-            corr.P2 = (roomB.x+roomB.wd, randint(roomB.y, roomB.y+roomB.hd-1))  # right of B
-        elif dir == 'NW':
-            if randint(0, 1) == 0:
-                first_dir = 'N'
-                corr.P1 = (randint(roomA.x, roomA.x+roomA.wd//2), roomA.y-1) # left half of top edge of A
-            else:
-                first_dir = 'W'
-                corr.P1 = (roomA.x-1, randint(roomA.y, roomA.y+roomA.hd//2)) # top half of left edge of A
-            if randint(0, 1) == 0:
-                last_dir = 'W'
-                corr.P2 = (roomB.x+roomB.wd, randint(roomB.y+roomB.hd//2, roomB.y+roomB.hd-1)) # bottom half of right edge of B
-            else:
-                last_dir = 'N'
-                corr.P2 = (randint(roomB.x+roomB.wd//2, roomB.x+roomB.wd-1), roomB.y+roomB.hd) # right half of bottom edge of B
-
-        if first_dir == 'N':
-            curP = (corr.P1[0],corr.P1[1]-1)
-        elif first_dir == 'E':
-            curP = (corr.P1[0]+1, corr.P1[1])
-        elif first_dir == 'S':
-            curP = (corr.P1[0], corr.P1[1]+1)
-        elif first_dir == 'W':
-            curP = (corr.P1[0]-1, corr.P1[1])
-        try:
-            corr.points.append(curP)
-        except:
-            print('dir: {}'.format(dir))
-            print('roomA: {}'.format(roomA.id))
-            print('roomB: {}'.format(roomB.id))
-            raise Exception('')
-
-        if last_dir == 'N':
-            destP = (corr.P2[0],corr.P2[1]+1)
-        elif last_dir == 'E':
-            destP = (corr.P2[0]-1, corr.P2[1])
-        elif last_dir == 'S':
-            destP = (corr.P2[0], corr.P2[1]-1)
-        elif last_dir == 'W':
-            destP = (corr.P2[0]+1, corr.P2[1])
-
-        while curP != destP:
-            if curP[0] != destP[0]:
-                newP = (curP[0]-1, curP[1]) if curP[0] > destP[0] else (curP[0]+1, curP[1])
-                print('wanted horizontally')
-            elif curP[1] != destP[1]:
-                newP = (curP[0], curP[1]-1) if curP[1] > destP[1] else (curP[0], curP[1]+1)
-                print('wanted vertically')
-
-            if self._check_point_collide(newP):
-                print('collision happened')
-                if curP[1] != destP[1]:
-                    newP = (curP[0], curP[1] - 1) if curP[1] > destP[1] else (curP[0], curP[1] + 1)
-                    print('go vertically')
-                elif curP[0] != destP[0]:
-                    newP = (curP[0] - 1, curP[1]) if curP[0] > destP[0] else (curP[0] + 1, curP[1])
-                    print('go horizontally')
-            else:
-                print('ok')
-
-            curP = newP
-            corr.points.append(curP)
-
-        corr.rooms = [roomA.id, roomB.id]
-        # TODO: here we could define entrance/exit as one of follow: none, door, secret door, trap door, etc.
-        # TODO: possible as door class with the states: locked/unlocked, trapped, secret, etc.
-        return corr
 
     def _generate_portal(self, roomA, roomB):
         #TODO: make portals great again!
