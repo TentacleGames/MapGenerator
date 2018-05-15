@@ -161,7 +161,8 @@ class Generator():
             if check.id == room.id:
                 continue
             mid_c = (check.x+(check.wd//2), check.y+(check.hd//2))
-            dist = pow((mid[0]-mid_c[0]),2) + pow((mid[1]-mid_c[1]),2) #squared dist
+            
+            dist = (mid[0]-mid_c[0])**2 + (mid[1]-mid_c[1])**2 #squared dist
             # squared dist is ok. if squared is minimal, then is't really minimal
             if dist > max_dist:
                 max_dist = dist
