@@ -188,6 +188,18 @@ class Generator():
     def _generate_corridor(self, roomA, roomB):
         def _create_door_points():
             return
+        
+        def _get_next_point(point, direction, opposite=False):
+            directions = {
+                'N': (0, -1),
+                'S': (0, +1),
+                'E': (+1, 0),
+                'W': (+1, 0)
+            }
+            k = -1 if opposite else 1
+            result = (point[0]+k*directions[direction][0], point[1]+k*directions[direction][1])
+            return result
+
         #TODO: refine
         corr = Corridor()
         corr.rooms.append(roomA.id)
@@ -273,24 +285,8 @@ class Generator():
                 last_dir = 'N'
                 corr.P2 = (randint(roomB.x+roomB.wd//2, roomB.x+roomB.wd-1), roomB.y+roomB.hd) # right half of bottom edge of B
 
-        startP = destP = None
-        if first_dir == 'N':
-            startP = (corr.P1[0],corr.P1[1]-1)
-        elif first_dir == 'E':
-            startP = (corr.P1[0]+1, corr.P1[1])
-        elif first_dir == 'S':
-            startP = (corr.P1[0], corr.P1[1]+1)
-        elif first_dir == 'W':
-            startP = (corr.P1[0]-1, corr.P1[1])
-
-        if last_dir == 'N':
-            destP = (corr.P2[0],corr.P2[1]+1)
-        elif last_dir == 'E':
-            destP = (corr.P2[0]-1, corr.P2[1])
-        elif last_dir == 'S':
-            destP = (corr.P2[0], corr.P2[1]-1)
-        elif last_dir == 'W':
-            destP = (corr.P2[0]+1, corr.P2[1])
+        startP = _get_next_point(corr.P1, first_dir)
+        destP = _get_next_point(corr.P2, last_dir, opposite=True)
 
         # TODO: move wave_field to self for reuse each time
         # TODO: move whole wave algorithm to another module
