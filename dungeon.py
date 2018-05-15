@@ -15,6 +15,9 @@ DEFAULT_PARAMS = {
 }
 
 
+MAX_ATTEMPTS = 10
+
+
 class Generator():
     def __init__(self, params={}):
         self.rooms = [] # rooms array
@@ -44,18 +47,21 @@ class Generator():
         #generate the room
         room = None
         collide = True
-        while collide is not None:
+        attempts = 0
+        while collide is not None or attempts < MAX_ATTEMPTS:
+            attempts += 1
             x = randint(2, self.params['width'] - self.params['room_size'][0] - 2)
             y = randint(2, self.params['height'] - self.params['room_size'][0] - 2)
             wd = randint(self.params['room_size'][0], self.params['room_size'][1])
             hd = randint(self.params['room_size'][0], self.params['room_size'][1])
-
             room = Room(x, y, wd, hd)
             # check collisions with existing rooms
             collide = self._check_room_collide(room)
-        room.id = len(self.rooms) + 1
-
-        #print('Room generated: {}, {}, {}, {}'.format(x, y, wd, hd)) # turn on for debug
+        if not collide:
+            room.id = len(self.rooms) + 1
+        else:
+            # failed to create a new room
+            room = None
         return room
 
     def _get_room(self, id):
@@ -118,62 +124,28 @@ class Generator():
         return len(con)==0
 
     def _find_room(self, room, rooms):
-        param = self.params.get('base_connecting')
-        if param == 'random':
-            return self._get_random_room(rooms)
-        mid = (room.x+(room.wd//2), room.y+(room.hd//2))
-        result = None
-        if param == 'closest':
-            dist = pow(self.params['width'],2)+pow(self.params['height'],2) #init squared min distance
-        else:
-            dist = 0 # init max distance
-        for check in rooms:
-            if check.id == room.id:
-                continue
-            mid_c = (check.x+(check.wd//2), check.y+(check.hd//2))
-            dist_c = pow((mid[0]-mid_c[0]),2) + pow((mid[1]-mid_c[1]),2) #squared distance
-            # squared dist is ok. if squared is minimal/maximal, then is't really minimal/maximal
-            if dist_c < dist and param=='closest' or dist_c > dist and param=='farest':
-                dist = dist_c
-                result = check
-        return result
-
-    def _find_closest_room(self, room, rooms):
-        mid = (room.x+(room.wd//2), room.y+(room.hd//2))
-        result = None
-        min_dist = pow(self.params['width'],2)+pow(self.params['height'],2) #squared min_dist
-        for check in rooms:
-            if check.id == room.id:
-                continue
-            mid_c = (check.x+(check.wd//2), check.y+(check.hd//2))
-            dist = pow((mid[0]-mid_c[0]),2) + pow((mid[1]-mid_c[1]),2) #squared dist
-            # squared dist is ok. if squared is minimal, then is't really minimal
-            if dist < min_dist:
-                min_dist = dist
-                result = check
-        return result
-
-    def _find_farest_room(self, room, rooms):
-        mid = (room.x+(room.wd//2), room.y+(room.hd//2))
-        result = None
-        max_dist = 0
-        for check in rooms:
-            if check.id == room.id:
-                continue
-            mid_c = (check.x+(check.wd//2), check.y+(check.hd//2))
-            
-            dist = (mid[0]-mid_c[0])**2 + (mid[1]-mid_c[1])**2 #squared dist
-            # squared dist is ok. if squared is minimal, then is't really minimal
-            if dist > max_dist:
-                max_dist = dist
-                result = check
-        return result
-
-    def _get_random_room(self, rooms):
         if not rooms:
             return None
-        i = randint(0, len(rooms)-1)
-        result = rooms[i]
+        param = self.params.get('base_connecting')
+        result = None
+        if param == 'random':
+            i = randint(0, len(rooms) - 1)
+            result = rooms[i]
+        else:
+            mid = (room.x+(room.wd//2), room.y+(room.hd//2))
+            if param == 'closest':
+                dist = self.params['width']**2 + self.params['height']**2 #init squared min distance
+            else:
+                dist = 0 # init max distance
+            for check in rooms:
+                if check.id == room.id:
+                    continue
+                mid_c = (check.x+(check.wd//2), check.y+(check.hd//2))
+                dist_c = (mid[0]-mid_c[0])**2 + (mid[1]-mid_c[1])**2 #squared distance
+                # squared dist is ok. if squared is minimal/maximal, then is't really minimal/maximal
+                if dist_c < dist and param=='closest' or dist_c > dist and param=='farest':
+                    dist = dist_c
+                    result = check
         return result
 
     def _check_room_collide(self, room):
