@@ -1,6 +1,6 @@
 # dungeon generator class
 from random import randint
-
+import copy
 
 DEFAULT_PARAMS = {
     'transitions_type' : 'both', # corridors/portals/both
@@ -26,6 +26,7 @@ class Generator():
         self.connections = {} # dict of room connections
         self.not_connected = {}
         self.params = DEFAULT_PARAMS
+        self.wave_field = None
         for param in params: # apply user params
             self.params[param] = params[param]
 
@@ -185,118 +186,19 @@ class Generator():
                 break
         return collide
 
-    def _generate_corridor(self, roomA, roomB):
-        def _create_door_points():
-            return
-        
-        def _get_next_point(point, direction, opposite=False):
-            directions = {
-                'N': (0, -1),
-                'S': (0, +1),
-                'E': (+1, 0),
-                'W': (+1, 0)
-            }
-            k = -1 if opposite else 1
-            result = (point[0]+k*directions[direction][0], point[1]+k*directions[direction][1])
-            return result
+    def _get_wave_field(self):
+        if not self.wave_field:
+            self.wave_field = self._set_void_map(value=None)
+            for room in self.rooms:  # mark blocking points
+                for x in range(room.x - 1, room.x + room.wd + 1):
+                    for y in range(room.y - 1, room.y + room.hd + 1):
+                        self.wave_field[y][x] = -1
+        return copy.deepcopy(self.wave_field) #get clone of wave_field
+        #return self.wave_field  # get clone of wave_field
 
-        #TODO: refine
-        corr = Corridor()
-        corr.rooms.append(roomA.id)
-        corr.rooms.append(roomB.id)
-        dir = ''
-        if roomA.id == roomB.id:
-            while not dir:
-                dir = '{}{}'.format(' NS'[randint(0, 2)], ' WE'[randint(0, 2)]).strip()
-        else:
-            if roomA.y != roomB.y:
-                dir += 'N' if roomA.y > roomB.y else 'S'
-            if roomA.x != roomB.x:
-                dir += 'W' if roomA.x > roomB.x else 'E'
-
-        first_dir = ''
-        last_dir = ''
-        if dir == 'N':
-            first_dir = last_dir = 'N'
-            corr.P1 = (randint(roomA.x, roomA.x+roomA.wd-1) , roomA.y-1) # top of A
-            corr.P2 = (randint(roomB.x, roomB.x+roomB.wd-1) , roomB.y+roomB.hd) # bottom of B
-        elif dir == 'NE':
-            if randint(0,1)==0:
-                first_dir = 'N'
-                corr.P1 = (randint(roomA.x+roomA.wd//2, roomA.x+roomA.wd-1), roomA.y-1) # right half of top edge of A
-            else:
-                first_dir = 'E'
-                corr.P1 = (roomA.x+roomA.wd, randint(roomA.y, roomA.y+roomA.hd//2)) # top half of right edge of A
-            if randint(0, 1) == 0:
-                last_dir = 'N'
-                corr.P2 = (randint(roomB.x, roomB.x+roomB.wd//2), roomB.y+roomB.hd) # left half of bottom edge of B
-            else:
-                last_dir = 'E'
-                corr.P2 = (roomB.x-1, randint(roomB.y+roomB.hd//2, roomB.y+roomB.hd-1)) # bottom half of left edge of B
-        elif dir == 'E':
-            first_dir = last_dir = 'E'
-            corr.P1 = (roomA.x+roomA.wd, randint(roomA.y, roomA.y+roomA.hd-1)) # right of A
-            corr.P2 = (roomB.x-1, randint(roomB.y, roomB.y+roomB.hd-1)) # left of B
-        elif dir == 'SE':
-            if randint(0, 1) == 0:
-                first_dir = 'E'
-                corr.P1 = (roomA.x+roomA.wd, randint(roomA.y+roomA.hd//2, roomA.y+roomA.hd-1)) # bottom half of right edge of A
-            else:
-                first_dir = 'S'
-                corr.P1 = (randint(roomA.x+roomA.wd//2, roomA.x+roomA.wd), roomA.y+roomA.hd) # right half of bottom edge of A
-            if randint(0, 1) == 0:
-                last_dir = 'S'
-                corr.P2 = (randint(roomB.x, roomB.x+roomB.wd//2), roomB.y-1) # left half of top edge of B
-            else:
-                last_dir = 'E'
-                corr.P2 = (roomB.x-1, randint(roomB.y, roomB.y+roomB.hd//2)) # top half of left edge of B
-        elif dir == 'S':
-            first_dir = last_dir = 'S'
-            corr.P1 = (randint(roomA.x, roomA.x + roomA.wd-1), roomA.y + roomA.hd)  # bottom of A
-            corr.P2 = (randint(roomB.x, roomB.x + roomB.wd-1), roomB.y-1)  # top of B
-        elif dir == 'SW':
-            if randint(0, 1) == 0:
-                first_dir = 'S'
-                corr.P1 = (randint(roomA.x, roomA.x+roomA.wd//2), roomA.y+roomA.hd) # left half of bottom edge of A
-            else:
-                first_dir = 'W'
-                corr.P1 = (roomA.x-1, randint(roomA.y+roomA.hd//2, roomA.y+roomA.hd-1)) # bottom half of left edge of A
-            if randint(0,1)==0:
-                last_dir = 'S'
-                corr.P2 = (randint(roomB.x+roomB.wd//2, roomB.x+roomB.wd-1), roomB.y-1) # right half of top edge of B
-            else:
-                last_dir = 'W'
-                corr.P2 = (roomB.x+roomB.wd, randint(roomB.y, roomB.y+roomB.hd//2)) # top half of right edge of B
-        elif dir == 'W':
-            first_dir = last_dir = 'W'
-            corr.P1 = (roomA.x-1, randint(roomA.y, roomA.y+roomA.hd-1))  # left of A
-            corr.P2 = (roomB.x+roomB.wd, randint(roomB.y, roomB.y+roomB.hd-1))  # right of B
-        elif dir == 'NW':
-            if randint(0, 1) == 0:
-                first_dir = 'N'
-                corr.P1 = (randint(roomA.x, roomA.x+roomA.wd//2), roomA.y-1) # left half of top edge of A
-            else:
-                first_dir = 'W'
-                corr.P1 = (roomA.x-1, randint(roomA.y, roomA.y+roomA.hd//2)) # top half of left edge of A
-            if randint(0, 1) == 0:
-                last_dir = 'W'
-                corr.P2 = (roomB.x+roomB.wd, randint(roomB.y+roomB.hd//2, roomB.y+roomB.hd-1)) # bottom half of right edge of B
-            else:
-                last_dir = 'N'
-                corr.P2 = (randint(roomB.x+roomB.wd//2, roomB.x+roomB.wd-1), roomB.y+roomB.hd) # right half of bottom edge of B
-
-        startP = _get_next_point(corr.P1, first_dir)
-        destP = _get_next_point(corr.P2, last_dir, opposite=True)
-
-        # TODO: move wave_field to self for reuse each time
-        # TODO: move whole wave algorithm to another module
-        wave_field = self._set_void_map(value = None)
-        for room in self.rooms: #mark blocking points
-            for x in range(room.x-1, room.x + room.wd+1):
-                for y in range(room.y-1, room.y + room.hd+1):
-                    wave_field[y][x] = -1
-        wave_field[startP[1]][startP[0]] = 0
-
+    def _calculate_path(self, startP, destP):
+        ''' generating path, using Lee algorithm (wave algorithm)
+        '''
         def _mark_point(point, idx=0, needMark = True):
             x = point[0]
             y = point[1]
@@ -350,10 +252,64 @@ class Generator():
                     return None
             return path
 
+        wave_field = self._get_wave_field()
+        wave_field[startP[1]][startP[0]] = 0
         passible = _set_distance([startP], destP)
         path = None
         if passible:
             path = _get_path(startP, destP)
+
+        return path
+
+    def _generate_corridor(self, roomA, roomB):
+
+        def _get_next_point(point, direction, opposite=False):
+            directions = {
+                'N': (0, -1),
+                'S': (0, +1),
+                'E': (+1, 0),
+                'W': (-1, 0)
+            }
+            k = -1 if opposite else 1
+            result = (point[0]+k*directions[direction][0], point[1]+k*directions[direction][1])
+            return result
+
+        def _get_door_points(room, direction, opposite=False):
+            opposition = {'N':'S', 'S':'N', 'E':'W', 'W':'E'}
+            direction = direction[randint(0, len(direction) - 1)]
+            if opposite:
+                direction = opposition[direction]
+            directions = {
+                'N': (randint(room.x, room.x+room.wd-1), room.y-1), #top
+                'S': (randint(room.x, room.x+room.wd-1), room.y+room.hd), #bottom
+                'E': (room.x + room.wd, randint(room.y, room.y + room.hd - 1)), # right
+                'W': (room.x - 1, randint(room.y, room.y + room.hd - 1))  # left
+            }
+            result = (directions[direction], opposition[direction] if opposite else direction)
+            return result
+
+        #TODO: refine
+        corr = Corridor()
+        # finding direction from room A to B
+        dir = ''
+        if roomA.id == roomB.id:
+            while not dir:
+                dir = '{}{}'.format(' NS'[randint(0, 2)], ' WE'[randint(0, 2)]).strip()
+        else:
+            if roomA.y != roomB.y:
+                dir += 'N' if roomA.y > roomB.y else 'S'
+            if roomA.x != roomB.x:
+                dir += 'W' if roomA.x > roomB.x else 'E'
+
+        # creating door-points (on the edge of the rooms)
+        corr.P1, first_dir = _get_door_points(roomA, dir)
+        corr.P2, last_dir = _get_door_points(roomB, dir, opposite=True)
+        # generation start and destination points for wave algorithm
+        startP = _get_next_point(corr.P1, first_dir)
+        destP = _get_next_point(corr.P2, last_dir, opposite=True)
+        # generating path
+        path = self._calculate_path(startP, destP)
+
         if path:
             corr.points = path
             corr.rooms = [roomA.id, roomB.id]
