@@ -9,6 +9,7 @@ DEFAULT_PARAMS = {
     'must_conected': True, # bool. Generate additional corridors, if needed, to connect the dungeon
     'room_size': (6, 12), # min, max
     'rooms_count': 10,
+    'max_connections_delta': 10, #max delta: (corridors + portals)-rooms
     'width': 120,
     'height': 50,
 }
@@ -112,6 +113,9 @@ class Generator():
                         room_B = self._find_room(room_A, [self._get_room(x) for x in val])
                         break
                 _add_connection(room_A, room_B)
+        removed = True
+        while (len(self.corridors)+len(self.portals))-len(self.rooms) > self.params.get('max_connections_delta') and removed:
+            removed = self._remove_connection()
         return
 
     def _is_connected(self):
@@ -313,6 +317,7 @@ class Generator():
         if path:
             corr.points = path
             corr.rooms = [roomA.id, roomB.id]
+            corr.id = len(self.corridors) + 1
             # TODO: here we could define entrance/exit as one of follow: none, door, secret door, trap door, etc.
             # TODO: possible as door class with the states: locked/unlocked, trapped, secret, etc.
             return corr
@@ -330,6 +335,57 @@ class Generator():
             row.append(value)
         for i in range(0, self.params['height']):
             result.append(list(row))
+        return result
+
+    def _remove_connection(self):
+
+        def _find_pair():
+            connections = {}
+            result = []
+            for corr in self.corridors:
+                if set(corr.rooms) in connections:
+                    connections[set(corr.rooms)].append('C{}'.format(corr.id))
+                    result = connections[set(corr.rooms)]
+                    break
+                else:
+                    connections[set(corr.rooms)] = ['C{}'.format(corr.id)]
+
+            for port in self.portals:
+                if set(port.rooms) in connections:
+                    connections[set(port.rooms)].append('P{}'.format(port.id))
+                    result = connections[set(port.rooms)]
+                    break
+                else:
+                    connections[set(port.rooms)] = ['P{}'.format(port.id)]
+            return result
+
+        result = False
+        if self.params.get('must_conected'):
+            pair = _find_pair()
+            if len(pair) < 2:
+                result = False
+            else:
+                id = pair[randint(0, 1)]
+                if id[0]=='C':
+                    for corr in self.corridors:
+                        if corr.id == int(id[1:]):
+                            self.corridors.remove(corr)
+                            result = True
+                            break
+                elif id[0]=='P':
+                    for port in self.portals:
+                        if port.id == int(id[1:]):
+                            self.portals.remove(port)
+                            result = True
+                            break
+        else:
+            result = False
+            if (randint(0,1) or not self.portals) and self.corridors:
+                del(self.corridors[randint(0, len(self.corridors)-1)])
+                result = True
+            elif self.portals:
+                del(self.portals[randint(0, len(self.portals)-1)])
+                result = True
         return result
 
     def get_result(self):
@@ -404,3 +460,4 @@ class Corridor():
         self.P2 = (None,None) # tuple (x2,y2) in room[0]
         self.points = []
         self.rooms = [] # ids of rooms connected
+        self.id = None
