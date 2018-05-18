@@ -4,9 +4,11 @@ import copy
 
 DEFAULT_PARAMS = {
     'transitions_type' : 'both', # corridors/portals/both
+    'portals_percent': 50, #portals percent, if allowed
     'each_room_transitions': True, # bool. Generate a corridor for each room
     'base_connecting': 'random', # closest, farest, random
     'must_conected': True, # bool. Generate additional corridors, if needed, to connect the dungeon
+    'corridor_curves': 'straight', #straight (as possible), curve, random
     'room_size': (6, 12), # min, max
     'rooms_count': 10,
     'max_connections_delta': 10, #max delta: (corridors + portals)-rooms
@@ -83,7 +85,7 @@ class Generator():
                 new_corridor = self._generate_portal(room_A, room_B)
             elif self.params.get('transitions_type') == 'both':
                 # TODO: both corridors and portals
-                if randint(0, 1) == 0:
+                if randint(1, 100) >= self.params['portals_percent']:
                     new_corridor = self._generate_corridor(room_A, room_B)
                 else:
                     new_corridor = self._generate_portal(room_A, room_B)
@@ -241,6 +243,9 @@ class Generator():
             curP = destP
             path.append(curP)
             neighborhood = [(0, -1), (0, +1), (-1, 0), (+1, 0)]
+            path_type = self.params['corridor_curves']
+            if path_type=='random':
+                path_type = ['straight','curve'][randint(0,1)]
             while curP != startP:
                 cur_idx = wave_field[curP[1]][curP[0]]
                 possible_moves = []
@@ -250,7 +255,8 @@ class Generator():
                     if idx is not None and idx == cur_idx-1:
                         possible_moves.append(point)
                 if possible_moves:
-                    curP = possible_moves[randint(0,len(possible_moves)-1)]
+                    i = 0 if path_type == 'straight' else randint(0, len(possible_moves) - 1)
+                    curP = possible_moves[i]
                     path.append(curP)
                 else:
                     return None
