@@ -245,7 +245,7 @@ class Generator():
             neighborhood = [(0, -1), (0, +1), (-1, 0), (+1, 0)]
             path_type = self.params['corridor_curves']
             if path_type=='random':
-                path_type = ['straight','crankle'][randint(0,1)]
+                path_type = ['straight','curve'][randint(0,1)]
             while curP != startP:
                 cur_idx = wave_field[curP[1]][curP[0]]
                 possible_moves = []
