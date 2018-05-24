@@ -30,6 +30,8 @@ class Generator():
         self.not_connected = {}
         self.params = DEFAULT_PARAMS
         self.wave_field = None
+        self.blocked_points = [] # array of points, blocked by portals
+        self.blocked_points.append((None,None)) # blocking null point
         for param in params: # apply user params
             self.params[param] = params[param]
 
@@ -82,17 +84,19 @@ class Generator():
                 new_corridor = self._generate_corridor(room_A, room_B)
             elif self.params.get('transitions_type') == 'portals':
                 # TODO: portals
-                new_corridor = self._generate_portal(room_A, room_B)
+                new_portal = self._generate_portal(room_A, room_B)
             elif self.params.get('transitions_type') == 'both':
                 # TODO: both corridors and portals
                 if randint(1, 100) >= self.params['portals_percent']:
                     new_corridor = self._generate_corridor(room_A, room_B)
                 else:
-                    new_corridor = self._generate_portal(room_A, room_B)
+                    new_portal = self._generate_portal(room_A, room_B)
             if new_corridor:
                 self.corridors.append(new_corridor)
             if new_portal:
                 self.portals.append(new_portal)
+                self.blocked_points.append(new_portal.P1)
+                self.blocked_points.append(new_portal.P2)
             for r in self.connections[room_B.id]:
                 self.connections[r] = self.connections[r] | self.connections[room_A.id]
             for r in self.connections[room_A.id]:
@@ -331,8 +335,31 @@ class Generator():
             return None
 
     def _generate_portal(self, roomA, roomB):
+        def _get_random_room_point(room):
+            x, y = None, None
+            i = 0
+            failed = False
+            while (x,y) in self.blocked_points:
+                i += 1
+                if i > 10:
+                    failed = True
+                    break
+                x = randint(room.x, room.x + room.wd -1)
+                y = randint(room.y, room.y + room.hd -1)
+
+            return None if failed else (x,y)
+
         #TODO: make portals great again!
-        return self._generate_corridor(roomA, roomB)
+        if roomA.id == roomB.id:
+            return None
+        port = Portal()
+
+        port.P1 = _get_random_room_point(roomA)
+        port.P2 = _get_random_room_point(roomB)
+        port.rooms = [roomA.id, roomB.id]
+        port.id = len(self.portals) + 1
+
+        return port if port.P1 and port.P2 else None
 
     def _set_void_map(self, value = 0):
         result = []
@@ -446,6 +473,10 @@ class Generator():
             self.result[corr.P1[1]][corr.P1[0]] = 3
             self.result[corr.P2[1]][corr.P2[0]] = 4
 
+        for port in self.portals:
+            self.result[port.P1[1]][port.P1[0]] = 10 + port.id
+            self.result[port.P2[1]][port.P2[0]] = 10 + port.id
+
 
 class Room():
     def __init__(self, x, y, w, h):
@@ -458,12 +489,16 @@ class Room():
 
 class Corridor():
     def __init__(self):
-        '''
-        :param roomA: room class instance
-        :param roomB: room class instance
-        '''
         self.P1 = (None,None) # tuple (x1,y1) in room[0]
         self.P2 = (None,None) # tuple (x2,y2) in room[0]
         self.points = []
         self.rooms = [] # ids of rooms connected
+        self.id = None
+
+
+class Portal():
+    def __init__(self):
+        self.P1 = (None, None)  # tuple (x1,y1) in room[0]
+        self.P2 = (None, None)  # tuple (x2,y2) in room[0]
+        self.rooms = []  # ids of rooms connected
         self.id = None
