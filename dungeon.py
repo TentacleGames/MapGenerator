@@ -375,21 +375,16 @@ class Generator():
         def _find_pair():
             connections = {}
             result = []
-            for corr in self.corridors:
-                if set(corr.rooms) in connections:
-                    connections[set(corr.rooms)].append('C{}'.format(corr.id))
-                    result = connections[set(corr.rooms)]
+            for item in self.corridors + self.portals:
+                check = tuple(sorted(item.rooms))
+                prefix = 'C' if isinstance(check, Corridor) else 'P'
+                if check in connections:
+                    connections[check].append('{}{}'.format(prefix, item.id))
+                    result = connections[check]
                     break
                 else:
-                    connections[set(corr.rooms)] = ['C{}'.format(corr.id)]
+                    connections[check] = ['{}{}'.format(prefix, item.id)]
 
-            for port in self.portals:
-                if set(port.rooms) in connections:
-                    connections[set(port.rooms)].append('P{}'.format(port.id))
-                    result = connections[set(port.rooms)]
-                    break
-                else:
-                    connections[set(port.rooms)] = ['P{}'.format(port.id)]
             return result
 
         result = False
@@ -474,8 +469,8 @@ class Generator():
             self.result[corr.P2[1]][corr.P2[0]] = 4
 
         for port in self.portals:
-            self.result[port.P1[1]][port.P1[0]] = 10 + port.id
-            self.result[port.P2[1]][port.P2[0]] = 10 + port.id
+            self.result[port.P1[1]][port.P1[0]] = 7
+            self.result[port.P2[1]][port.P2[0]] = 7
 
 
 class Room():

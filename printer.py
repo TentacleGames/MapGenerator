@@ -19,8 +19,5 @@ def draw(dung):
     '''
     for row in dung:
         for item in row:
-            if item >=10:
-                print(str(item-10), end='')
-            else:
-                print(char_map[item], end='')
+             print(char_map[item], end='')
         print('')

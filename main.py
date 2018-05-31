@@ -4,17 +4,17 @@ from dungeon import Generator
 import printer
 
 params = {
-    'transitions_type' : 'portals', # corridors/portals/both
+    'transitions_type' : 'both', # corridors/portals/both
     'each_room_transitions': True, # bool. Generate a corridor for each room
     'must_conected': True, # bool. Generate additional corridors, if needed, to connect the dungeon
     'room_size': (2, 3), # min, max
-    'rooms_count': 5,
-    'max_connections_delta': 10, #max delta: (corridors + portals)-rooms
-    'base_connecting': 'random', # closest, farest, random
+    'rooms_count': 8,
+    'max_connections_delta': 1, #max delta: (corridors + portals)-rooms
+    'base_connecting': 'closest', # closest, farest, random
     'width': 80,
     'height': 20,
     'corridor_curves': 'random', #straight (as possible), curve, random
-    'portals_percent': 10
+    'portals_percent': 20
 
 }
 
