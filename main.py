@@ -7,14 +7,14 @@ params = {
     'transitions_type' : 'both', # corridors/portals/both
     'each_room_transitions': True, # bool. Generate a corridor for each room
     'must_conected': True, # bool. Generate additional corridors, if needed, to connect the dungeon
-    'room_size': (2, 3), # min, max
-    'rooms_count': 8,
-    'max_connections_delta': 1, #max delta: (corridors + portals)-rooms
+    'room_size': (4, 5), # min, max
+    'rooms_count': 20,
+    'max_connections_delta': 30, #max delta: (corridors + portals)-rooms
     'base_connecting': 'closest', # closest, farest, random
-    'width': 80,
-    'height': 20,
+    'width': 140,
+    'height': 80,
     'corridor_curves': 'random', #straight (as possible), curve, random
-    'portals_percent': 20
+    'portals_percent': 10
 
 }
 
