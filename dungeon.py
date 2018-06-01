@@ -1,6 +1,5 @@
 # dungeon generator class
 from random import randint
-import copy
 
 DEFAULT_PARAMS = {
     'transitions_type': 'both',  # corridors/portals/both
@@ -39,7 +38,8 @@ class Generator:
         for i in range(0, self.params['rooms_count']):
             new_room = self._generate_room()
             # TODO: here we could dwell a room, place an items, etc.
-            self.rooms.append(new_room)
+            if new_room:
+                self.rooms.append(new_room)
         for room in self.rooms:
             self.connections[room.id] = {room.id}
 
@@ -53,7 +53,7 @@ class Generator:
         room = None
         collide = True
         attempts = 0
-        while collide is not None or attempts < MAX_ATTEMPTS:
+        while collide is not None and attempts < MAX_ATTEMPTS:
             attempts += 1
             x = randint(2, self.params['width'] - self.params['room_size'][0] - 2)
             y = randint(2, self.params['height'] - self.params['room_size'][0] - 2)
@@ -194,13 +194,12 @@ class Generator:
         return collide
 
     def _get_wave_field(self):
-        if not self.wave_field:
-            self.wave_field = self._set_void_map(value=None)
-            for room in self.rooms:  # mark blocking points
-                for x in range(room.x - 1, room.x + room.wd + 1):
-                    for y in range(room.y - 1, room.y + room.hd + 1):
-                        self.wave_field[y][x] = -1
-        return copy.deepcopy(self.wave_field)  # get clone of wave_field
+        self.wave_field = self._set_void_map(value=None)
+        for room in self.rooms:  # mark blocking points
+            for x in range(room.x - 1, room.x + room.wd + 1):
+                for y in range(room.y - 1, room.y + room.hd + 1):
+                    self.wave_field[y][x] = -1
+        return self.wave_field  # get clone of wave_field
 
     def _calculate_path(self, start_p, dest_p):
         """ generating path, using Lee algorithm (wave algorithm) """
