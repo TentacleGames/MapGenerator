@@ -31,6 +31,7 @@ class Generator:
         self.wave_field = None
         self.blocked_points = []  # array of points, blocked by portals
         self.blocked_points.append((None, None))  # blocking null point
+        self.exits = []  # list of exits
         for param in params:  # apply user params
             self.params[param] = params[param]
 
@@ -44,6 +45,8 @@ class Generator:
             self.connections[room.id] = {room.id}
 
         self._set_connections()
+
+        self._set_exits()
 
         self.get_result()
         return self.result
@@ -311,6 +314,10 @@ class Generator:
         # creating door-points (on the edge of the rooms)
         corr.P1, first_dir = _get_door_points(room_a, direction)
         corr.P2, last_dir = _get_door_points(room_b, direction, opposite=True)
+
+        corr.door1 = bool(randint(0, 1)) #  randomizing doors
+        corr.door2 = bool(randint(0, 1))
+
         # generation start and destination points for wave algorithm
         start_p = _get_next_point(corr.P1, first_dir)
         dest_p = _get_next_point(corr.P2, last_dir, opposite=True)
@@ -408,6 +415,19 @@ class Generator:
                 result = True
         return result
 
+    def _set_exits(self):
+        for i in [0, 1]:
+            e_room = self.rooms[randint(0, len(self.rooms)-1)]
+            e_point = (None, None)
+            while e_point in self.blocked_points:
+                dx = int(e_room.wd > 2)
+                dy = int(e_room.hd > 2)
+                rand_x = randint(e_room.x + dx, e_room.x + e_room.wd - (1+dx))
+                rand_y = randint(e_room.y + dy, e_room.y + e_room.hd - (1+dy))
+                e_point = (rand_x, rand_y)
+            self.exits.append(e_point)
+        return
+
     def get_result(self):
 
         self.result = self._set_void_map()
@@ -452,8 +472,13 @@ class Generator:
                 except:
                     print('Error while handling point: {}'.format(str(point)))
                     raise Exception()
-            self.result[corr.P1[1]][corr.P1[0]] = 3
-            self.result[corr.P2[1]][corr.P2[0]] = 4
+            # printing doors
+            self.result[corr.P1[1]][corr.P1[0]] = 3 if corr.door1 else 5
+            self.result[corr.P2[1]][corr.P2[0]] = 4 if corr.door2 else 5
+
+            #printing exits
+            self.result[self.exits[0][1]][self.exits[0][0]] = 8
+            self.result[self.exits[1][1]][self.exits[1][0]] = 9
 
         for port in self.portals:
             self.result[port.P1[1]][port.P1[0]] = 7
@@ -473,6 +498,8 @@ class Corridor:
     def __init__(self):
         self.P1 = (None, None)  # tuple (x1,y1) in room[0]
         self.P2 = (None, None)  # tuple (x2,y2) in room[0]
+        self.door1 = None #  True/False to door or not to door
+        self.door2 = None
         self.points = []
         self.rooms = []  # ids of rooms connected
         self.id = None

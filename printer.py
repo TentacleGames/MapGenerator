@@ -9,7 +9,8 @@ char_map = {
     5: '.', # corridor floor
     6: '#', # corridor wall
     7: '0', # portal
-
+    8: '<', # ladder up
+    9: '>', # ladder down
 }
 
 
