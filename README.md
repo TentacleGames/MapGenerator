@@ -129,13 +129,13 @@ Parameters definition
 
 `each_room_transitions` - means that each room have at least one connection to another room
 
-`must_conected` - if it's true, then all rooms should be reachable
+`are_connected` - if it's true, then all rooms should be reachable
 
 `base_connecting` - if it's "closest" or "farest" then rooms will be connected with closest/farest neighbor, and "random" is random.
 
-`corridor_curves` - style of corridors. Could be straight (as possible), curved (a lots of turnings). In case of random, this parameter sets randomly to "straight" or "curve" for each corridor
+`corridor_curves` - style of corridors. Could be `straight` (as possible), `curved` (a lots of turnings). In case of random, this parameter sets randomly to `straight` or `curved` for each corridor
 
-`max_connections_delta` - this parameter is needed to delete excess corridors (if it's possible, considering "must_connected" parameter)
+`max_connections_delta` - this parameter is needed to delete excess corridors (if it's possible, considering "are_connected" parameter)
 
 
 How to use

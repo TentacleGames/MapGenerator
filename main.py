@@ -6,7 +6,7 @@ import printer
 params = {
     'transitions_type' : 'both', # corridors/portals/both
     'each_room_transitions': True, # bool. Generate a corridor for each room
-    'must_conected': True, # bool. Generate additional corridors, if needed, to connect the dungeon
+    'are_connected': True, # bool. Generate additional corridors, if needed, to connect the dungeon
     'room_size': (4, 6), # min, max
     'rooms_count': 5,
     'max_connections_delta': 30, #max delta: (corridors + portals)-rooms
