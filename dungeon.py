@@ -6,7 +6,7 @@ DEFAULT_PARAMS = {
     'portals_percent': 50,  # portals percent, if allowed
     'each_room_transitions': True,  # bool. Generate a corridor for each room
     'base_connecting': 'random',  # closest, farest, random
-    'is_connected': True,  # bool. Generate additional corridors, if needed, to connect the dungeon
+    'must_conected': True,  # bool. Generate additional corridors, if needed, to connect the dungeon
     'corridor_curves': 'straight',  # straight (as possible), curve, random
     'room_size': (6, 12),  # min, max
     'rooms_count': 10,
@@ -109,7 +109,7 @@ class Generator:
                 room_b = self._find_room(room_a, self.rooms)
                 _add_connection()
 
-        if self.params.get('is_connected'):
+        if self.params.get('must_conected'):
             while not self._is_connected():
                 room_a = None
                 room_b = None
@@ -387,7 +387,7 @@ class Generator:
             return result
 
         result = False
-        if self.params.get('is_connected'):
+        if self.params.get('must_conected'):
             pair = _find_pair()
             if len(pair) < 2:
                 result = False
