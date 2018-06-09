@@ -129,7 +129,7 @@ Parameters definition
 
 `each_room_transitions` - means that each room have at least one connection to another room
 
-`must_conected` - if it's true, then all rooms should be reachable
+`is_connected` - if it's true, then all rooms should be reachable
 
 `base_connecting` - if it's "closest" or "farest" then rooms will be connected with closest/farest neighbor, and "random" is random.
 
