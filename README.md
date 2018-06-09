@@ -1,7 +1,7 @@
 MapGenerator
 ===========
 
-Custom dungeon generation algorithm for roguelike games.
+Customizable dungeon generation algorithm for roguelike games.
 
 All maps are customizable by parameters.
 
