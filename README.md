@@ -3,7 +3,7 @@ MapGenerator
 
 Customizable dungeon generation algorithm for roguelike games.
 
-All maps are customizable by parameters.
+All maps are customizable by parameters, described just below these exmaples.
 
 Examples
 --------
@@ -121,21 +121,21 @@ Parameters definition
 
 `room_size` - tuple of min and max size of rooms
 
-`rooms_count` - maximum number of rooms in dungeon (actual number of rooms could be less in case there is not enough space)
+`rooms_count` - maximum number of rooms in dungeon (if there's not enough space, the actual number of rooms could be less than)
 
 `transitions_type` - type of transitions between rooms: portals or corridors or both
 
-`portals_percent` - percentage of portals if transitions_type it 'both'
+`portals_percent` - percentage of portals if transitions_type is 'both'
 
-`each_room_transitions` - means that each room have at least one connection
+`each_room_transitions` - means that each room have at least one connection to another room
 
 `must_conected` - if it's true, then all rooms should be reachable
 
-`base_connecting` - if it "closest" or "farest" then rooms will be connected with closest/farest neighbor, and "random" is random.
+`base_connecting` - if it's "closest" or "farest" then rooms will be connected with closest/farest neighbor, and "random" is random.
 
-`corridor_curves` - style of corridors. Could be straight (as possible), curve (a lots of turnings). In case of random, this parameter sets randomly to "straight" or "curve" for each corridor
+`corridor_curves` - style of corridors. Could be straight (as possible), curved (a lots of turnings). In case of random, this parameter sets randomly to "straight" or "curve" for each corridor
 
-`max_connections_delta` - this parameter needed to delete excess corridors (if it possible, considering "must_connected" parameter)
+`max_connections_delta` - this parameter is needed to delete excess corridors (if it's possible, considering "must_connected" parameter)
 
 
 How to use
@@ -143,13 +143,13 @@ How to use
 
 `dungeoun.py` - algorithm module;
 
-`printer.py` - simpliest module for output;
+`printer.py` - simplest module for output;
 
 `main.py` - entry point.
 
-To use this module in your project you need only `dungeon.py`.
+To use this module in your project you only need `dungeon.py`.
 
-Example of usage you can see in `main.py`
+An example usage is in the `main.py`.
 
 ### Steps:
 
