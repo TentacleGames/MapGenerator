@@ -6,8 +6,8 @@ DEFAULT_PARAMS = {
     'portals_percent': 50,  # portals percent, if allowed
     'each_room_transitions': True,  # bool. Generate a corridor for each room
     'base_connecting': 'random',  # closest, farest, random
-    'must_conected': True,  # bool. Generate additional corridors, if needed, to connect the dungeon
-    'corridor_curves': 'straight',  # straight (as possible), curve, random
+    'are_connected': True,  # bool. Generate additional corridors, if needed, to connect the dungeon
+    'corridor_curves': 'straight',  # straight (as possible), curved, random
     'room_size': (6, 12),  # min, max
     'rooms_count': 10,
     'max_connections_delta': 10,  # max delta: (corridors + portals)-rooms
@@ -246,7 +246,7 @@ class Generator:
             neighborhood = [(0, -1), (0, +1), (-1, 0), (+1, 0)]
             path_type = self.params['corridor_curves']
             if path_type == 'random':
-                path_type = ['straight', 'curve'][randint(0, 1)]
+                path_type = ['straight', 'curved'][randint(0, 1)]
             while cur_p != start_p:
                 cur_idx = wave_field[cur_p[1]][cur_p[0]]
                 possible_moves = []
