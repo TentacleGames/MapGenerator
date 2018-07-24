@@ -109,7 +109,7 @@ class Generator:
                 room_b = self._find_room(room_a, self.rooms)
                 _add_connection()
 
-        if self.params.get('must_conected'):
+        if self.params.get('are_connected'):
             while not self._is_connected():
                 room_a = None
                 room_b = None
@@ -387,7 +387,7 @@ class Generator:
             return result
 
         result = False
-        if self.params.get('must_conected'):
+        if self.params.get('are_connected'):
             pair = _find_pair()
             if len(pair) < 2:
                 result = False
