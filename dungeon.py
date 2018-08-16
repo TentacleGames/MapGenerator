@@ -1,4 +1,4 @@
-# dungeon generator class
+connections# dungeon generator class
 from random import randint
 
 DEFAULT_PARAMS = {
@@ -476,9 +476,9 @@ class Generator:
             self.result[corr.P1[1]][corr.P1[0]] = 3 if corr.door1 else 5
             self.result[corr.P2[1]][corr.P2[0]] = 4 if corr.door2 else 5
 
-            #printing exits
-            self.result[self.exits[0][1]][self.exits[0][0]] = 8
-            self.result[self.exits[1][1]][self.exits[1][0]] = 9
+        #printing exits
+        self.result[self.exits[0][1]][self.exits[0][0]] = 8
+        self.result[self.exits[1][1]][self.exits[1][0]] = 9
 
         for port in self.portals:
             self.result[port.P1[1]][port.P1[0]] = 7
